@@ -27,40 +27,43 @@
 			• Always confirm with service --status-all and dpkg that the services are completely stopped and uninstalled.
 		
 		
-Solution using both the service and systemctl commands for illustration:
+	Solution using both the service and systemctl commands for illustration:
 
-	1. List All Services and Save to a File:
+1. List All Services and Save to a File:
 	
 	systemctl list-units --type=service --all > service_list.txt
-	2. Identify Running Services:
+2. Identify Running Services:
 	
 	grep -iE "mysql|samba" service_list.txt
-sudo systemctl status mysql
-sudo systemctl status smbd
-	3. Stop, Disable, and Remove Services:
-	
-	# Stop
+	sudo systemctl status mysql
+	sudo systemctl status smbd
+
+3. Stop, Disable, and Remove Services:
+# Stop
 sudo systemctl stop mysql
 sudo service mysql stop
 sudo systemctl stop smbd
 sudo service smbd stop
-	# Disable
+
+# Disable
 sudo systemctl disable mysql
 sudo systemctl mask mysql
 sudo systemctl disable smbd
 sudo systemctl mask smbd
-	# Remove
+
+# Remove
 sudo apt remove --purge mysql-server mysql-client mysql-common -y
 sudo apt remove --purge samba samba-common -y
 sudo apt autoremove -y
 sudo apt autoclean
-	4. Verify Removal:
+
+4. Verify Removal:
 	
-	sudo systemctl status mysql
+sudo systemctl status mysql
 sudo systemctl status smbd
 dpkg -l | grep -E "mysql|samba"
 	
-	Final Notes
+Final Notes
 	By following these steps:
 		1. You listed all services and identified if mysql or samba were running.
 		2. You stopped, disabled, and removed these services securely using both systemctl and service.
