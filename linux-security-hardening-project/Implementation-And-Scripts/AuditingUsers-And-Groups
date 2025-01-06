@@ -1,5 +1,8 @@
-Script-name: employee_management.sh
+# Employee Management Script
 
+## Script Name: `employee_management.sh`
+
+```bash
 #!/bin/bash
 
 # Define employee data (this should come from a file or system in a real-world scenario)
@@ -48,14 +51,14 @@ if ! getent group research &>/dev/null; then
     sudo groupadd research
 fi
 
-#for user in "${MARKETING_USERS[@]}"; do
- #   if id "$user" &>/dev/null; then
-  #      echo "Adding $user to the research group..."
-   #     sudo usermod -aG research "$user"
-   # else
-    #    echo "User $user does not exist. Skipping..."
-   # fi
-# done
+for user in "${MARKETING_USERS[@]}"; do
+    if id "$user" &>/dev/null; then
+        echo "Adding $user to the research group..."
+        sudo usermod -aG research "$user"
+    else
+        echo "User $user does not exist. Skipping..."
+    fi
+done
 
 # Step 5: Remove the marketing group
 echo "Removing the marketing group..."
@@ -66,6 +69,7 @@ else
 fi
 
 echo "Employee management tasks completed successfully!"
+
 
 
 Explanation of the Script
