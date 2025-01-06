@@ -1,0 +1,68 @@
+	# Step 1: List all services and save to file
+	service --status-all > service_list.txt
+	
+	# Step 2: Check for mysql and samba services and any unnecessary services
+	grep -i "mysql" service_list.txt
+	grep -i "samba" service_list.txt
+	
+	# Step 3: Stop, disable, and remove mysql
+	sudo service mysql stop
+	sudo update-rc.d -f mysql remove
+	sudo apt-get remove --purge mysql-server -y
+	sudo apt-get autoremove -y
+	
+	# Step 3: Stop, disable, and remove samba
+	sudo service smbd stop
+	sudo update-rc.d -f smbd remove
+	sudo apt-get remove --purge samba -y
+	sudo apt-get autoremove -y
+	
+	# Step 4: Verify
+	service --status-all | grep -i "mysql"
+	service --status-all | grep -i "samba"
+	
+		Final Notes:
+			• update-rc.d is used to disable services on systems where systemctl is not installed.
+			• The --purge option ensures that configuration files for mysql and samba are also removed.
+			• Always confirm with service --status-all and dpkg that the services are completely stopped and uninstalled.
+		
+		
+Solution using both the service and systemctl commands for illustration:
+
+	1. List All Services and Save to a File:
+	
+	systemctl list-units --type=service --all > service_list.txt
+	2. Identify Running Services:
+	
+	grep -iE "mysql|samba" service_list.txt
+sudo systemctl status mysql
+sudo systemctl status smbd
+	3. Stop, Disable, and Remove Services:
+	
+	# Stop
+sudo systemctl stop mysql
+sudo service mysql stop
+sudo systemctl stop smbd
+sudo service smbd stop
+	# Disable
+sudo systemctl disable mysql
+sudo systemctl mask mysql
+sudo systemctl disable smbd
+sudo systemctl mask smbd
+	# Remove
+sudo apt remove --purge mysql-server mysql-client mysql-common -y
+sudo apt remove --purge samba samba-common -y
+sudo apt autoremove -y
+sudo apt autoclean
+	4. Verify Removal:
+	
+	sudo systemctl status mysql
+sudo systemctl status smbd
+dpkg -l | grep -E "mysql|samba"
+	
+	Final Notes
+	By following these steps:
+		1. You listed all services and identified if mysql or samba were running.
+		2. You stopped, disabled, and removed these services securely using both systemctl and service.
+		3. You verified the services were fully removed.
+	This process ensures that unnecessary services are no longer consuming resources or posing a security risk.

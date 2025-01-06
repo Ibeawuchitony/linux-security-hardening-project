@@ -1,0 +1,70 @@
+Step 1: Open the Crontab Editor
+
+To edit the cron schedule for the current user, run the following command:
+
+sudo crontab -e
+	• sudo: Ensures the scripts run with the necessary permissions.
+	• crontab -e: Opens the cron table editor.
+
+Step 2: Add Cron Jobs
+Add the following two lines to schedule the scripts as specified:
+
+	1. Script 1 - Run Once a Month on the First Day of the Month:
+	
+		○ Schedule the script hardening_script1.sh to run at 12:00 AM on the 1st of every month.
+
+0 0 1 * * /hardening_script1.sh
+	2. Script 2 - Run Once a Week on Mondays:
+	
+		○ Schedule the script hardening_script2.sh to run at 12:00 AM every Monday.
+
+0 0 * * 1 /hardening_script2.sh
+
+Final Crontab File Example
+Your crontab file will look something like this:
+
+# Run hardening_script1.sh once a month on the 1st at 12:00 AM
+0 0 1 * * /path/to/hardening_script1.sh
+# Run hardening_script2.sh once a week on Mondays at 12:00 AM
+0 0 * * 1 /path/to/hardening_script2.sh
+
+Step 3: Save and Exit
+	1. After adding the lines, save the file:
+		○ If you’re using nano, press Ctrl+O to save, then Ctrl+X to exit.
+		
+	2. Verify that the cron jobs were added:
+
+sudo crontab -l
+
+The output should show the scheduled tasks.
+
+Step 4: Ensure the Scripts Are Executable
+Make sure both scripts have executable permissions:
+
+chmod +x /path/to/hardening_script1.sh
+chmod +x /path/to/hardening_script2.sh
+
+Step 5: Verify Cron Service
+Ensure the cron service is running:
+	• Check status:
+
+sudo systemctl status cron
+	
+	• Start and enable the service if it’s not running:
+
+sudo systemctl start cron
+sudo systemctl enable cron
+
+
+Summary
+	1. Open the crontab editor with sudo crontab -e.
+	2. Add the following cron jobs:
+
+plaintext
+Copy code
+0 0 1 * * /path/to/hardening_script1.sh
+0 0 * * 1 /path/to/hardening_script2.sh
+	3. Ensure the scripts are executable and the cron service is running.
+Your scripts will now run:
+	• Script 1: At 12:00 AM on the 1st of every month.
+	• Script 2: At 12:00 AM every Monday. 

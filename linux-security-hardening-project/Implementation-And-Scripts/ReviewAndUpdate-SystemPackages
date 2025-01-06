@@ -1,0 +1,60 @@
+
+	1. Update the Package Manager: Run the following command to refresh the package lists:
+		a. sudo apt update
+	2. Upgrade All Installed Packages: Update all packages to their latest versions with:
+		a. sudo apt upgrade -y
+	3. Generate a List of Installed Packages
+		a. Create a file called package_list.txt containing all installed packages:
+			i. apt list --installed > package_list.txt
+		b. Verify the file was created:
+			i. cat package_list.txt
+	4. Identify and Remove Insecure Packages
+		a. Search for Telnet and RSH-Client: Check if telnet or rsh-client are installed by running
+			i. grep -E "telnet|rsh-client" package_list.txt
+		b. If any of these packages appear in the list, remove them with
+			i. sudo apt remove --purge telnet rsh-client -y
+		c. Clean Up Unnecessary Dependencies: Run the following command to remove unused dependencies:
+			i. sudo apt autoremove -y
+			
+	5. Why Telnet and RSH-Client Are Insecure:
+		Telnet:
+			• Sends data, including passwords, in plaintext.
+			• Makes it vulnerable to interception (e.g., packet sniffing).
+		• RSH-Client:
+			○ Provides remote shell access without encryption.
+			○ Vulnerable to man-in-the-middle attacks, as credentials are sent unencrypted.
+	Summary: Both tools lack encryption, making them obsolete and insecure in modern systems.
+
+	6. Install Security Hardening Packages
+		Install the following packages to improve system security:
+			• UFW (Uncomplicated Firewall): A user-friendly firewall management tool.
+			• Lynis: A system and security auditing tool.
+			• Tripwire: A file integrity monitoring tool.
+		Run the following command to install all three packages:
+			sudo apt install ufw lynis tripwire -y
+	7. Research and Document Hardening Features
+		UFW (Uncomplicated Firewall):
+			• Provides an easy way to manage iptables rules.
+			• Allows administrators to configure inbound and outbound firewall rules.
+			• Helps block unauthorized access while allowing trusted connections.
+			• Example: Allow SSH access while blocking other ports:
+				sudo ufw allow 22
+				sudo ufw enable
+				
+		Lynis:
+			• Audits system security settings and configurations.
+			• Performs checks for vulnerabilities, misconfigurations, and security weaknesses.
+			• Generates a report with recommendations to harden the system.
+			• Run Lynis with:
+				□ sudo lynis audit system
+		Tripwire:
+			• Monitors file integrity and detects unauthorized changes to critical system files.
+			• Useful for intrusion detection and post-breach analysis.
+			• Initializes with:
+				sudo tripwire --init
+				sudo tripwire --check
+	8. Final Verification
+		a. Verify installed packages:
+			i. dpkg -l | grep -E "ufw|lynis|tripwire"
+		b. Ensure telnet and rsh-client are no longer installed:
+			i. dpkg -l | grep -E "telnet|rsh-client"

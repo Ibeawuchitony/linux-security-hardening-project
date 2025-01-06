@@ -1,0 +1,90 @@
+	Step 1: Configure journald.conf Settings
+	The journald.conf file controls the system journal (systemd-journald), which manages logging.
+	
+		1. Open the journald.conf file for editing:
+
+sudo nano /etc/systemd/journald.conf
+		2. Find and edit the following settings. Uncomment the lines (remove the #) and set the specified values:
+
+Storage=persistent
+SystemMaxUse=300M
+			○ Storage=persistent: Saves logs locally to /var/log/journal/ so they persist after reboots.
+			○ SystemMaxUse=300M: Limits the maximum disk space used by the system journal to 300 MB.
+			
+		3. Save the changes and exit (Ctrl+O, Enter, Ctrl+X).
+		
+		4. Restart the systemd-journald service to apply the changes:
+		sudo systemctl restart systemd-journald
+		5. Verify the changes:
+
+sudo journalctl --disk-usage
+
+The output should show the disk usage and confirm the 300 MB limit.
+	
+	Step 2: Configure Log Rotation in /etc/logrotate.conf
+	
+	The logrotate utility manages log files to prevent them from consuming too much disk space.
+	
+		1. Open the logrotate.conf file for editing:
+		sudo nano /etc/logrotate.conf
+		2. Find and update the following settings:
+			○ Change rotation frequency from weekly to daily: Replace:
+weekly
+With:
+daily
+			○ Rotate logs after 7 days: Add or update the rotate option to:
+rotate 7
+
+Final Example of /etc/logrotate.conf:
+
+# Log rotation settings
+daily
+rotate 7
+create
+compress
+include /etc/logrotate.d
+			
+			○ daily: Rotates logs every day.
+			○ rotate 7: Keeps logs for 7 days (rotates out old logs).
+			○ create: Creates a new log file after rotation.
+			○ compress: Compresses old log files to save space.
+		3. Save the changes and exit.
+	
+	Step 3: Test Log Rotation Configuration
+	To ensure the new settings work correctly:
+		1. Run logrotate in debug mode:
+		2. sudo logrotate -d /etc/logrotate.conf
+		
+			○ -d: Runs in debug mode (does not make changes but shows what would happen).
+			○ Verify the output shows logs being rotated daily and retaining 7 rotations.
+			
+		3. Force log rotation to test:
+
+sudo logrotate -f /etc/logrotate.conf
+		
+			○ -f: Forces the log rotation immediately.
+			
+		4. Check the rotated logs:
+
+ls -lh /var/log
+	
+	Summary of Steps
+		1. Edit /etc/systemd/journald.conf:
+
+Storage=persistent
+SystemMaxUse=300M
+
+Restart the service:
+
+sudo systemctl restart systemd-journald
+		
+		2. Edit /etc/logrotate.conf:
+			○ Change to daily rotation.
+			○ Rotate logs for 7 days.
+			
+		3. Test logrotate:
+
+sudo logrotate -d /etc/logrotate.conf
+sudo logrotate -f /etc/logrotate.conf
+		
+	By completing these steps, you ensure logs are persisted, limited to 300 MB of space, rotated daily, and retained for 7 days. This prevents excessive disk usage while maintaining a manageable log history.

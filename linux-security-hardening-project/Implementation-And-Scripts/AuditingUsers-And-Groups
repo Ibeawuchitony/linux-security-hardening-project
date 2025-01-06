@@ -1,0 +1,90 @@
+Script-name: employee_management.sh
+
+#!/bin/bash
+
+# Define employee data (this should come from a file or system in a real-world scenario)
+TERMINATED_USERS=("lestrade" "irene" "mary" "gregson")
+ON_LEAVE_USERS=("moriarty" "mrs_hudson")
+EMPLOYED_USERS=("sherlock" "watson" "mycroft" "toby" "adler")
+MARKETING_USERS=("mycroft" "irene")
+
+# Step 1: Remove all staff who have been terminated
+echo "Removing terminated users and their home directories..."
+for user in "${TERMINATED_USERS[@]}"; do
+    if id "$user" &>/dev/null; then
+        echo "Deleting user $user..."
+        sudo userdel -r "$user"
+    else
+        echo "User $user does not exist. Skipping..."
+    fi
+done
+
+# Step 2: Lock all user accounts of staff on temporary leave
+echo "Locking accounts for staff on temporary leave..."
+for user in "${ON_LEAVE_USERS[@]}"; do
+    if id "$user" &>/dev/null; then
+        echo "Locking account for $user..."
+        sudo passwd -l "$user"
+    else
+        echo "User $user does not exist. Skipping..."
+    fi
+done
+
+# Step 3: Unlock any users who are employed
+echo "Unlocking accounts for employed staff..."
+for user in "${EMPLOYED_USERS[@]}"; do
+    if id "$user" &>/dev/null; then
+        echo "Unlocking account for $user..."
+        sudo passwd -u "$user"
+    else
+        echo "User $user does not exist. Skipping..."
+    fi
+done
+
+# Step 4: Move all employees from the marketing group to a new group called research
+echo "Moving marketing employees to the research group..."
+if ! getent group research &>/dev/null; then
+    echo "Creating research group..."
+    sudo groupadd research
+fi
+
+#for user in "${MARKETING_USERS[@]}"; do
+ #   if id "$user" &>/dev/null; then
+  #      echo "Adding $user to the research group..."
+   #     sudo usermod -aG research "$user"
+   # else
+    #    echo "User $user does not exist. Skipping..."
+   # fi
+# done
+
+# Step 5: Remove the marketing group
+echo "Removing the marketing group..."
+if getent group marketing &>/dev/null; then
+    sudo groupdel marketing
+else
+    echo "Marketing group does not exist. Skipping..."
+fi
+
+echo "Employee management tasks completed successfully!"
+
+
+Explanation of the Script
+	1. Remove Terminated Staff:
+		○ The script loops through the TERMINATED_USERS array.
+		○ The userdel -r command removes the user and their home directory.
+	2. Lock Accounts for Staff on Temporary Leave:
+		○ The script loops through the ON_LEAVE_USERS array.
+		○ The passwd -l command locks their account, disabling login.
+	3. Unlock Accounts for Employed Staff:
+		○ The script loops through the EMPLOYED_USERS array.
+		○ The passwd -u command unlocks their accounts, enabling login.
+	4. Move Marketing Employees to the Research Group:
+		○ If the research group doesn’t exist, it creates it with groupadd.
+		○ Then, it adds the marketing employees to the research group using usermod -aG.
+	5. Remove the Marketing Group:
+		○ If the marketing group exists, it deletes it with groupdel.
+
+Assumptions
+	• The users already exist on the system, and their group memberships can be checked with id.
+	• sudo or root privileges are required to manage users, groups, and permissions.
+	• In a real-world setup, this script would likely read user data from a database or file

@@ -1,0 +1,172 @@
+Requirement 1: In every user’s home directory, there should be no files that have any world permissions to read, write, or execute. Find any of them and update to remove the world permissions
+
+Solution: World permissions are indicated by the presence of r, w, or x in the "others" field when running ls -l. To locate such files and directories
+
+	1. Find Files with World Permissions in /homes directory excluding root home directory and copy output to a file for review before changing permissions
+	
+			find  /home -type f  -perm  /o=rwx   -exec ls -l   {} +  > /var/log/weak_permissions_fixed.log
+			
+			To  exclude certain directories from the search use the -prune option:  e.g.  To exclude /home/root
+			
+			find  /home  -path /home/root -prune -o  -type f  -perm  /o=rwx   -exec ls -l   {} +  > /var/log/weak_permissions_fixed.log
+			
+				• /home: Searches within all users' home directories.
+				• -perm /o=rwx: Matches files or directories with any world permissions (read, write, or execute).
+				
+	2. Update Permissions to Remove World Access after output file review. To recursively remove world permissions from the files and directories, use the chmod command: Command to Fix All World Permissions:
+
+			find /home -perm /o=rwx -exec chmod o-rwx {} +
+			
+				• chmod o-rwx: Removes read, write, and execute permissions for "others".
+				• {} +: Efficiently passes all matching files/directories to the chmod command.
+	
+	3. Verify Changes. After running the above command, verify that no files or directories have world permissions: If the command returns nothing, it means all world permissions have been removed successfully.
+
+			find  /home -type f  -perm  /o=rwx   -exec ls -l   {} +
+
+		
+
+Automate the Process with a Script
+
+	#!/bin/bash
+	
+	echo "Searching for files and directories with world permissions in /home..."
+	# Find and remove world permissions
+	find /home -perm /o=rwx -exec chmod o-rwx {} + -print > /var/log/weak_permissions_fixed.log
+	
+	echo "World permissions removed from all files and directories in /home."
+	echo "A log of changes has been saved to /var/log/weak_permissions_fixed.log."
+	
+
+Requirement 2:
+Find the following files and make the associated updates: 
+(Hint: Search with the case-insensitive option.)
+	○ Engineering scripts (scripts with the word ‘engineering’ in the filename): Only members of the engineering group can view, edit, or execute.
+	○ Research scripts: Only members of the research group can view, edit, or execute.
+	○ Finance scripts: Only members of the finance group can view, edit, or execute.
+
+SOLUTION:
+
+	1. Locate Files. To search for files containing specific keywords (e.g., engineering, research, finance) in their filenames and output to a file for review before permission. change use the find command with a case-insensitive option:
+
+			# Engineering scripts
+			find / -type f -iname "*engineering*" -exec ls -l {} + > engineering-scripts.txt
+			find / -type f -iname "*engineering*" -exec chmod 770 {} + -exec chgrp engineering {} +
+			
+			# Research scripts
+			find / -type f -iname "*research*" -exec ls -l {} + > research-scripts.txt
+			find / -type f -iname "*research*" -exec chmod 770 {} + -exec chgrp research {} +
+			
+			# Finance scripts
+			find / -type f -iname "*finance*" -exec ls -l {} + > finance-scripts.txt
+			find / -type f -iname "*finance*" -exec chmod 770 {} + -exec chgrp finance {} +
+			
+					Explanation:
+						• /: Searches the entire filesystem (you can replace / with a specific directory if needed).
+						• -type f: Finds files only (not directories).
+						• -iname: Performs a case-insensitive search for filenames matching the pattern.
+						• chmod 770: Grants full permissions to the owner and group (rwx) but no permissions to others.
+						• chgrp: Changes the group ownership of the file to the specified group (engineering, research, finance).
+						• {} +: Passes all matching files to the chmod and chgrp commands in batches for efficiency.
+
+
+	1. Verify Changes. To confirm that the permissions were updated correctly, use the ls -l command on the target files:
+
+			# Check engineering scripts
+			find / -type f -iname "*engineering*" -exec ls -l {} +
+			
+			# Check research scripts
+			find / -type f -iname "*research*" -exec ls -l {} +
+			
+			# Check finance scripts
+			find / -type f -iname "*finance*" -exec ls -l {} +
+			
+					Ensure the permissions look like this for each group:
+						• Owner: Full access (rwx).
+						• Group: Full access (rwx).
+						• Others: No access (---).
+					
+
+Script to Automate This
+
+	#!/bin/bash
+	
+	echo "Updating permissions for engineering scripts..."
+	find / -type f -iname "*engineering*" -exec chmod 770 {} + -exec chgrp engineering {} +
+	
+	echo "Updating permissions for research scripts..."
+	find / -type f -iname "*research*" -exec chmod 770 {} + -exec chgrp research {} +
+	
+	echo "Updating permissions for finance scripts..."
+	find / -type f -iname "*finance*" -exec chmod 770 {} + -exec chgrp finance {} +
+	
+	echo "Permissions updated successfully."
+
+Note: Ensure the groups engineering, research, and finance exist. Create them if needed:
+
+		sudo groupadd engineering
+		sudo groupadd research
+		sudo groupadd finance
+		
+	Add Users to Groups: Add the appropriate users to the respective groups:
+	
+		sudo usermod -aG engineering username
+		sudo usermod -aG research username
+		sudo usermod -aG finance username
+		
+
+Requirement 3: Some employees may leave files with hidden passwords. Find those files and remove them as no employee should have their passwords stored on the server
+
+SOLUTION:
+
+	1. Locate Files Containing "Password".  Use the grep command to search for files containing the word "password" across the system. Combine it with find to scan through all user directories.
+
+		find /home -type f -exec grep -i -l "password" {} +
+		find /home -type f -exec grep -i -l "password" {} + > /var/log/suspected_password_files.log
+		
+			• /home: Restricts the search to user directories (adjust as needed).
+			• -type f: Searches for files only.
+			• grep -i -l "password":
+				• -i: Makes the search case-insensitive.
+				• -l: Lists only the filenames containing the word "password".
+
+	2. Review and Confirm. Before removing files, review the list of files to confirm whether they truly contain sensitive information. Save the list of files for review:
+
+		find /home -type f -exec grep -i -l "password" {} + > /var/log/suspected_password_files.log
+		cat /var/log/suspected_password_files.log
+		
+	3. Remove the files. Once you confirm the files should be removed, you can delete them. Use the following command:
+		
+		find /home -type f -exec grep -i -l "password" {} + -exec rm -f {} +
+		
+			rm -f: Forcefully removes the files without prompting.
+			
+	4. Verify Removal.  After running the script, ensure no files remain with the keyword "password":
+
+		find /home -type f -exec grep -i -l "password" {} +
+			
+
+Automate with a Script
+
+	#!/bin/bash
+	
+	LOGFILE="/var/log/suspected_password_files.log"
+	
+	echo "Searching for files containing 'password'..."
+	find /home -type f -exec grep -i -l "password" {} + > $LOGFILE
+	
+	echo "Files containing 'password' have been logged in $LOGFILE."
+	
+	echo "Removing files containing 'password'..."
+	find /home -type f -exec grep -i -l "password" {} + -exec rm -f {} +
+	
+	echo "Files have been removed."
+	
+
+Prevent Future Occurrences:
+
+	1. Educate Employees: Inform users about the risks of storing passwords in plaintext files.
+	2. Audit Regularly: Schedule periodic scans to ensure no password-containing files are created later.
+	3. Restrict Permissions: Limit file access and enforce password policies to reduce risks.
+	
+With these steps, you ensure that files containing sensitive passwords are identified and securely removed from the system.

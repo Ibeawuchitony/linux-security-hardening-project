@@ -1,0 +1,183 @@
+Script 1:  Updated Script: hardening_script1.sh
+
+#!/bin/bash
+
+# Variable for the report output file, choose an output file name
+REPORT_FILE="hardening_report.txt"
+
+# Output the hostname
+echo "Gathering hostname..."
+echo "Hostname: $(hostname)" >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Output the OS version
+echo "Gathering OS version..."
+echo "OS Version: $(cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '\"')" >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Output memory information
+echo "Gathering memory information..."
+echo "Memory Information: $(free -h | grep Mem)" >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Output uptime information
+echo "Gathering uptime information..."
+echo "Uptime Information: $(uptime -p)" >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Backup the OS
+echo "Backing up the OS..."
+sudo tar -cvpzf /baker_street_backup_$(date +%F).tar.gz --exclude=/baker_street_backup.tar.gz --exclude=/proc --exclude=/tmp --exclude=/mnt --exclude=/sys --exclude=/dev --exclude=/run   /
+
+echo "OS backup completed." >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Output the sudoers file to the report
+echo "Gathering sudoers file..."
+echo "Sudoers file:" >> $REPORT_FILE
+cat /etc/sudoers >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Script to check for files with world permissions and update them
+echo "Checking for files with world permissions..."
+find /home -perm /o=rwx -exec chmod o-rwx {} +
+echo "World permissions have been removed from any files found." >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Find specific files and update their permissions
+echo "Updating permissions for specific scripts..."
+
+# Engineering scripts - Only members of the engineering group
+echo "Updating permissions for Engineering scripts."
+find / -iname '*engineering*' -exec chown :engineering {} + -exec chmod 770 {} +
+echo "Permissions updated for Engineering scripts." >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Research scripts - Only members of the research group
+echo "Updating permissions for Research scripts..."
+find / -iname '*research*' -exec chown :research {} + -exec chmod 770 {} +
+echo "Permissions updated for Research scripts." >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Finance scripts - Only members of the finance group
+echo "Updating permissions for Finance scripts..."
+find / -iname '*finance*' -exec chown :finance {} + -exec chmod 770 {} +
+echo "Permissions updated for Finance scripts." >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+echo "Script execution completed. Check $REPORT_FILE for details."
+
+
+	Explanation of Updates
+		1. Output the hostname:
+			○ Replaced placeholder with the hostname command.
+		2. Output the OS version:
+			○ Extracted OS version using cat /etc/os-release.
+		3. Output memory information:
+			○ Used free -h to fetch memory details.
+		4. Output uptime information:
+			○ Used uptime -p for human-readable uptime.
+		5. OS Backup:
+			○ Used tar to create a backup of /etc, /usr, /var/log, and /home.
+		6. Output sudoers file:
+			○ Used cat /etc/sudoers to display the sudoers file.
+		7. Check and remove world permissions:
+			○ Used find /home -perm /o=rwx -exec chmod o-rwx {} + to identify and remove world permissions.
+		8. Update permissions for scripts:
+			○ For Engineering, Research, and Finance scripts:
+				§ Changed group ownership with chown.
+				§ Restricted permissions to group members using chmod 770
+	
+
+	Expected Results After running the script
+		• A file called hardening_report.txt containing:
+			○ Hostname
+			○ OS version
+			○ Memory information
+			○ Uptime details
+			○ Confirmation of OS backup
+			○ Contents of the sudoers file
+			○ Confirmation that world permissions have been removed.
+			○ Confirmation that permissions for engineering, research, and finance scripts have been updated.
+		• The OS backup will be located in /var/backups/ with a timestamp.
+
+
+
+
+Script 2: Updated Script: hardening_script2.sh
+
+#!/bin/bash
+
+# Variable for the report output file, choose a NEW output file name
+REPORT_FILE="hardening_report2.txt"
+
+# Output the sshd configuration file
+echo "Gathering details from sshd configuration file"
+echo "sshd configuration file:" >> $REPORT_FILE
+cat /etc/ssh/sshd_config >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Update packages and services
+echo "Updating packages and services"
+apt update >> $REPORT_FILE 2>&1
+apt upgrade -y >> $REPORT_FILE 2>&1
+
+echo "Packages have been updated and upgraded" >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# List all installed packages
+echo "Listing all installed packages..."
+echo "Installed Packages:" >> $REPORT_FILE
+apt list --installed >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Output journald configuration data
+echo "Printing out logging configuration data"
+echo "journald.conf file data:" >> $REPORT_FILE
+cat /etc/systemd/journald.conf >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+# Output logrotate configuration data
+echo "Printing out logrotate configuration data"
+echo "logrotate.conf file data:" >> $REPORT_FILE
+cat /etc/logrotate.conf >> $REPORT_FILE
+printf "\n" >> $REPORT_FILE
+
+echo "Script execution completed. Check $REPORT_FILE for details."
+
+	Explanation of Updates
+		1. REPORT_FILE:
+			○ Changed placeholder to hardening_report2.txt.
+		2. Output SSH Configuration:
+			○ Used cat /etc/ssh/sshd_config to display the SSH configuration file.
+		3. Update and Upgrade Packages:
+			○ Used:
+
+sudo apt update
+sudo apt upgrade -y
+
+These commands update the package lists and upgrade all installed packages.
+		4. List Installed Packages:
+			○ Used:
+
+apt list --installed
+
+This lists all installed packages.
+		5. Output journald Configuration:
+			○ Used cat /etc/systemd/journald.conf to display the journald configuration file.
+		6. Output logrotate Configuration:
+			○ Used cat /etc/logrotate.conf to display the logrotate configuration file.
+	
+		Expected Results
+		The output file hardening_report2.txt will contain:
+			1. sshd configuration.
+			2. Package update and upgrade details.
+			3. List of all installed packages.
+			4. Contents of the journald.conf file.
+			5. Contents of the logrotate.conf file.
+		
+			Final Notes
+			This script automates:
+				• System updates.
+				• Logging configurations.
+				• Gathering essential system configuration files

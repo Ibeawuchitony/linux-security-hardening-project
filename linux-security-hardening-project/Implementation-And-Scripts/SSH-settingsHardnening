@@ -1,0 +1,36 @@
+
+	1. Edit the SSH Configuration File: The SSH settings are located in the configuration file: /etc/ssh/sshd_config
+	2. Update the Configuration to Harden SSH. Locate and update the following settings in the file:
+		a. Disable SSH with Empty Passwords: Find or add the following line:
+			i. PermitEmptyPasswords no
+		b. Disable SSH Access for the Root User: Find or add the following line:
+			i. PermitRootLogin no
+		c. Restrict SSH to Port 22: Ensure the following line exists and that no other ports are enabled:
+			i. Port 22
+		d. Enable SSH Protocol 2: Find or add the following line to enforce SSH Protocol 2:
+			i. Protocol 2
+	3. Restart the SSH Service:
+		a. For Systemd-based systems (most modern Linux distributions):
+			i. sudo systemctl restart sshd
+		b. For older systems (SysV init):
+			i. sudo service ssh restart
+	4. Verify the Changes:
+		a. Check SSH Service Status: Verify that the SSH service is running properly
+			i. sudo systemctl status sshd
+		b. Test SSH Configuration: Run the following command to validate the SSH configuration file: If there are no errors, the file is valid. 
+			i. sudo sshd -t
+		c. Check for Open Ports: Verify that SSH is only listening on port 22:The output should show SSH listening only on port 22
+			i. sudo ss -tulnp | grep ssh
+	5. Confirm Security Settings:
+		• Empty Passwords: Test that logging in with an empty password is denied.
+		• Root Login: Ensure the root user cannot SSH into the server.
+		• Port 22 Only: Ensure SSH works only on port 22.
+		• Protocol 2: Confirm that only SSH Protocol 2 is enabled (use ssh -v to check).
+		
+	
+	6. Example of /etc/ssh/sshd_config After Updates:
+		# Hardened SSH Configuration
+		PermitEmptyPasswords no
+		PermitRootLogin no
+		Port 22
+		Protocol 2

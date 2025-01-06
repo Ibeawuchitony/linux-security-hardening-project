@@ -1,0 +1,51 @@
+	1. Edit the sudoers File Safely. Use visudo to edit the sudoers file safely. This ensures syntax errors do not lock you out of administrative access.
+
+		sudo visudo
+		
+	2. Update sudoers Configuration. Make the following changes in the sudoers file:
+		a. Grant Full Sudo Privileges to Sherlock. Add the following line to ensure that only sherlock has full sudo privileges and Remove any other lines that grant full sudo access to other users or groups.
+		
+			i. sherlock ALL=(ALL:ALL) ALL
+		
+		b. Restrict Watson and Mycroft to Specific Script. Add these lines to give watson and mycroft permissions to run /var/log/logcleanup.sh only:
+		
+			watson ALL=(ALL) NOPASSWD: /var/log/logcleanup.sh
+			mycroft ALL=(ALL) NOPASSWD: /var/log/logcleanup.sh
+			
+				• NOPASSWD: ensures they don't need to enter a password when running this specific script.
+				• These users will not have permission to run any other commands with sudo.
+
+	3. Grant Research Group Access to a Specific Script. Add this line to give all users in the research group permission to run /tmp/scripts/research_script.sh
+		
+		%research ALL=(ALL) NOPASSWD: /tmp/scripts/research_script.sh
+		
+			• %research references the group research.
+			• This allows all users in the research group to run the script without requiring a password.
+
+	4. Remove Other Full Privileged Users or Groups. Review the rest of the sudoers file and remove or comment out (#) any entries granting full sudo privileges to other users or groups. For example Remove lines like for users or groups other than sherlock:
+
+		ALL=(ALL:ALL) ALL
+		
+Final Configuration Summary in sudoers:
+
+		# Full sudo privileges for Sherlock
+		sherlock ALL=(ALL:ALL) ALL
+		
+		# Limited sudo privileges for Watson and Mycroft
+		watson ALL=(ALL) NOPASSWD: /var/log/logcleanup.sh
+		mycroft ALL=(ALL) NOPASSWD: /var/log/logcleanup.sh
+		
+		# Group-based sudo privileges for the research group
+		%research ALL=(ALL) NOPASSWD: /tmp/scripts/research_script.sh
+		
+	5. Test the Configuration
+		a. Validate Sherlock's Full Privileges: Switch to user sherlock  and run a test sudo command
+			i. su - sherlock && sudo whoami
+		b. Test Watson's and Mycroft's Limited Privileges: Switch to watson or mycroft and Run the allowed script and try running an unauthorized command
+			i. su - watson && sudo /var/log/logcleanup.sh
+			ii. sudo ls /root
+		c. Test Research Group Access:Add a user to the research group (if needed), Switch to the user and Run the allowed script
+			i. sudo usermod -aG research username; su - username ; sudo /tmp/scripts/research_script.sh
+
+Additional Notes: Group Creation: Ensure the research group exists
+	sudo groupadd research

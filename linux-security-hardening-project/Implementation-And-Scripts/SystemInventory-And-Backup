@@ -1,0 +1,26 @@
+	1. Collect system information
+
+	echo "HostName: $(hostname)" && echo "OS Version: $(cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2)" && echo "Memory Information: $(free -h | grep Mem)" && echo "Uptime Information: $(uptime -p)"
+	
+	OR
+	
+	#!/bin/bash
+	
+	echo "---- System Information ----"
+	echo "HostName: $(hostname)"
+	echo "OS Version: $(cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '\"')"
+	echo "Memory Information:"
+	free -h
+	echo "Uptime Information:"pwd
+	uptime -p
+	
+	
+	Save as file name - gather-sys-info.sh   
+	chmod +x  gather-sys-info.sh
+	 ./ gather-sys-info.sh 
+	
+	
+	
+	2. OS Backup
+
+	sudo tar -cvpzf /baker_street_backup.tar.gz --exclude=/baker_street_backup.tar.gz --exclude=/proc --exclude=/tmp --exclude=/mnt --exclude=/sys --exclude=/dev --exclude=/run   /
