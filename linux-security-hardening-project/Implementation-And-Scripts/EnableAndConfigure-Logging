@@ -1,23 +1,20 @@
-	Step 1: Configure journald.conf Settings
+Step 1: Configure journald.conf Settings
 	The journald.conf file controls the system journal (systemd-journald), which manages logging.
 	
 		1. Open the journald.conf file for editing:
-
-sudo nano /etc/systemd/journald.conf
+			sudo nano /etc/systemd/journald.conf
 		2. Find and edit the following settings. Uncomment the lines (remove the #) and set the specified values:
-
-Storage=persistent
-SystemMaxUse=300M
-			○ Storage=persistent: Saves logs locally to /var/log/journal/ so they persist after reboots.
-			○ SystemMaxUse=300M: Limits the maximum disk space used by the system journal to 300 MB.
+			Storage=persistent
+			SystemMaxUse=300M
+		○ Storage=persistent: Saves logs locally to /var/log/journal/ so they persist after reboots.
+		○ SystemMaxUse=300M: Limits the maximum disk space used by the system journal to 300 MB.
 			
 		3. Save the changes and exit (Ctrl+O, Enter, Ctrl+X).
 		
 		4. Restart the systemd-journald service to apply the changes:
-		sudo systemctl restart systemd-journald
+			sudo systemctl restart systemd-journald
 		5. Verify the changes:
-
-sudo journalctl --disk-usage
+			sudo journalctl --disk-usage
 
 The output should show the disk usage and confirm the 300 MB limit.
 	
@@ -26,14 +23,14 @@ The output should show the disk usage and confirm the 300 MB limit.
 	The logrotate utility manages log files to prevent them from consuming too much disk space.
 	
 		1. Open the logrotate.conf file for editing:
-		sudo nano /etc/logrotate.conf
+			sudo nano /etc/logrotate.conf
 		2. Find and update the following settings:
 			○ Change rotation frequency from weekly to daily: Replace:
-weekly
-With:
-daily
+					weekly
+					With:
+					daily
 			○ Rotate logs after 7 days: Add or update the rotate option to:
-rotate 7
+					rotate 7
 
 Final Example of /etc/logrotate.conf:
 
